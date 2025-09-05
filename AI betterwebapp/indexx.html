@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Powered Inclusive Workplace Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.9)), 
+                  url('https://img.freepik.com/free-vector/hand-drawn-business-ethics_23-2148754605.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    #app {
+      width: 100%;
+      max-width: 800px;
+      background-color: rgba(255, 255, 255, 0.97);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .screen {
+      display: none;
+      padding: 20px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .screen.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    h1 {
+      color: #00695c;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+    
+    h2 {
+      color: #00695c;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    h3 {
+      color: #004d40;
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+    
+    button {
+      background: #00695c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      margin: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:hover {
+      background: #004d40;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* Scenario menu buttons */
+    #scenario-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+    
+    #scenario-list button {
+      width: 100%;
+      max-width: 500px;
+      margin: 10px auto;
+      padding: 16px;
+      background: #00695c;
+      color: #fff;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: block;
+      text-align: center;
+    }
+    
+    #scenario-list button:hover {
+      background: #004d40;
+      transform: translateY(-2px);
+    }
+    
+    #options {
+      margin-top: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    /* Answer option buttons */
+    .option-btn {
+      width: 100%;
+      max-width: 550px;
+      background: #f8f9fa;
+      color: #222;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 16px 20px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s;
+      font-size: 1rem;
+    }
+    
+    .option-btn:hover {
+      background: #e8f5e9;
+      border-color: #4caf50;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    #feedback {
+      margin-top: 25px;
+      font-size: 1.1rem;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #f1f8e9;
+    }
+    
+    .correct {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    
+    .incorrect {
+      color: #c62828;
+      font-weight: bold;
+    }
+    
+    .warning {
+      color: #f57c00;
+      font-weight: bold;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    #progress {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    
+    #global-progress {
+      font-size: 1.1rem;
+      color: #00695c;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+    
+    #completion-screen h2 {
+      color: #00695c;
+      margin-bottom: 15px;
+    }
+    
+    #completion-message {
+      font-size: 1.2rem;
+      margin: 25px 0;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .scenario-generator {
+      margin: 20px 0;
+      padding: 20px;
+      background: #e8f5e9;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .scenario-generator select, .scenario-generator input {
+      padding: 12px;
+      margin: 10px 5px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 300px;
+      font-size: 1rem;
+    }
+    
+    .scenario-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: left;
+      transition: transform 0.2s;
+    }
+    
+    .scenario-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .scenario-card h4 {
+      color: #00695c;
+      margin-bottom: 8px;
+    }
+    
+    .scenario-card p {
+      text-align: left;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .play-btn {
+      background: #00695c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    
+    .play-btn:hover {
+      background: #004d40;
+    }
+    
+    .ai-badge {
+      display: inline-block;
+      background: #00695c;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    /* Header styling similar to homepage */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0 20px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+    
+    .app-logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .app-logo-icon {
+      background-color: #00695c;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    .app-logo h1 {
+      color: #00695c;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+    
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: #00695c;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      #app {
+        width: 95%;
+        padding: 15px;
+        margin: 20px 0;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      button {
+        padding: 12px 20px;
+        margin: 8px;
+      }
+      
+      .scenario-generator {
+        padding: 15px;
+      }
+      
+      .app-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .app-logo {
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- App Header -->
+    <div class="app-header">
+      <div class="app-logo">
+        <div class="app-logo-icon">IW</div>
+        <h1>Inclusive Workplace Simulator</h1>
+      </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" class="screen active">
+      <h2>Build More Inclusive Workplaces</h2>
+      <p>Experience AI-generated scenarios to recognize bias, build empathy, and create safer workplaces through interactive learning.</p>
+      <div style="text-align: center;">
+        <button id="start-btn">Start Simulation</button>
+      </div>
+    </div>
+
+    <!-- Scenario Selection -->
+    <div id="scenario-menu" class="screen">
+      <h2>Select a Scenario Type</h2>
+      <p id="global-progress">Progress: 0 scenarios completed</p>
+      
+      <div class="scenario-generator">
+        <h3>Generate Custom Scenario</h3>
+        <select id="scenario-type">
+          <option value="hiring">Hiring Bias</option>
+          <option value="microaggressions">Microaggressions</option>
+          <option value="psychological-safety">Psychological Safety</option>
+          <option value="cultural-stereotypes">Cultural Stereotypes</option>
+          <option value="accessibility">Accessibility</option>
+          <option value="gender-bias">Gender Bias</option>
+          <option value="leadership">Inclusive Leadership</option>
+          <option value="communication">Inclusive Communication</option>
+        </select>
+        <br>
+        <input type="number" id="question-count" min="1" max="5" value="3" placeholder="Number of questions">
+        <br>
+        <button id="generate-scenario">Generate New Scenario</button>
+      </div>
+      
+      <div id="scenario-list">
+        <h3>Your Generated Scenarios</h3>
+        <div id="generated-scenarios-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button id="back-to-start">Back to Start</button>
+      </div>
+    </div>
+
+    <!-- Scenario Gameplay -->
+    <div id="scenario-container" class="screen">
+      <h2 id="scenario-title"></h2>
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <p id="progress"></p>
+      <p id="scenario-question"></p>
+      <div id="options"></div>
+      <div id="feedback"></div>
+      <div style="text-align: center;">
+        <button id="next-btn" class="hidden">Next Question</button>
+        <button id="back-to-menu" class="hidden">Back to Menu</button>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div id="completion-screen" class="screen">
+      <h2>Scenario Complete!</h2>
+      <div style="text-align: center; font-size: 4rem; margin: 20px 0;">🎉</div>
+      <p id="completion-message"></p>
+      <div style="text-align: center;">
+        <button id="restart-scenario">Restart Scenario</button>
+        <button id="back-to-menu-2">Back to Menu</button>
+      </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen">
+      <h2>Generating Your Scenario</h2>
+      <p>Our AI is creating a personalized workplace scenario for you...</p>
+      <div style="text-align: center;">
+        <div class="loading" style="margin: 20px auto; width: 40px; height: 40px;"></div>
+        <p id="generation-status">Initializing AI engine</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // API configuration
+    const API_BASE_URL = 'http://localhost:8080'; // Your API endpoint
+    
+    // Sample scenario categories
+    const scenarioCategories = {
+      "hiring": "Hiring Bias",
+      "microaggressions": "Microaggressions", 
+      "psychological-safety": "Psychological Safety",
+      "cultural-stereotypes": "Cultural Stereotypes",
+      "accessibility": "Accessibility",
+      "gender-bias": "Gender Bias",
+      "leadership": "Inclusive Leadership",
+      "communication": "Inclusive Communication"
+    };
+
+    let currentScenario = null;
+    let currentIndex = 0;
+    let completedScenarios = new Set();
+    let generatedScenarios = JSON.parse(localStorage.getItem('generatedScenarios')) || {};
+
+    // DOM References
+    const screens = {
+      startMenu: document.getElementById("start-menu"),
+      scenarioMenu: document.getElementById("scenario-menu"),
+      scenarioContainer: document.getElementById("scenario-container"),
+      completionScreen: document.getElementById("completion-screen"),
+      loadingScreen: document.getElementById("loading-screen")
+    };
+
+    const elements = {
+      startBtn: document.getElementById("start-btn"),
+      backToStartBtn: document.getElementById("back-to-start"),
+      backToMenuBtn: document.getElementById("back-to-menu"),
+      restartScenarioBtn: document.getElementById("restart-scenario"),
+      backToMenuBtn2: document.getElementById("back-to-menu-2"),
+      generateScenarioBtn: document.getElementById("generate-scenario"),
+      scenarioTitle: document.getElementById("scenario-title"),
+      progressText: document.getElementById("progress"),
+      progressBar: document.getElementById("progress-bar"),
+      scenarioQuestion: document.getElementById("scenario-question"),
+      optionsDiv: document.getElementById("options"),
+      feedbackDiv: document.getElementById("feedback"),
+      nextBtn: document.getElementById("next-btn"),
+      completionMessage: document.getElementById("completion-message"),
+      globalProgress: document.getElementById("global-progress"),
+      generatedScenariosContainer: document.getElementById("generated-scenarios-container"),
+      generationStatus: document.getElementById("generation-status")
+    };
+
+    // Initialize Event Listeners
+    function initEventListeners() {
+      elements.startBtn.addEventListener("click", () => showScreen(screens.scenarioMenu));
+      elements.backToStartBtn.addEventListener("click", () => showScreen(screens.startMenu));
+      elements.backToMenuBtn.addEventListener("click", () => showScreen(screens.scenarioMenu));
+      elements.backToMenuBtn2.addEventListener("click", () => showScreen(screens.scenarioMenu));
+      elements.restartScenarioBtn.addEventListener("click", restartScenario);
+      elements.generateScenarioBtn.addEventListener("click", generateNewScenario);
+      elements.nextBtn.addEventListener("click", nextQuestion);
+    }
+
+    // Screen Management
+    function showScreen(screen) {
+      Object.values(screens).forEach(s => s.classList.remove("active"));
+      screen.classList.add("active");
+      
+      if (screen === screens.scenarioMenu) {
+        renderScenarioMenu();
+      }
+    }
+
+    // Scenario Menu Rendering
+    function renderScenarioMenu() {
+      elements.globalProgress.textContent = `Progress: ${completedScenarios.size} scenario${completedScenarios.size !== 1 ? 's' : ''} completed`;
+      
+      elements.generatedScenariosContainer.innerHTML = '';
+      
+      const scenarioKeys = Object.keys(generatedScenarios);
+      
+      if (scenarioKeys.length === 0) {
+        elements.generatedScenariosContainer.innerHTML = "<p>No scenarios generated yet. Create one using the form above!</p>";
+        return;
+      }
+      
+      scenarioKeys.forEach(key => {
+        const scenario = generatedScenarios[key];
+        const scenarioCard = document.createElement('div');
+        scenarioCard.className = 'scenario-card';
+        
+        const isCompleted = completedScenarios.has(key);
+        const completionRate = calculateCompletionRate(scenario);
+        
+        scenarioCard.innerHTML = `
+          <h4>${scenario.title} ${isCompleted ? '✅' : ''} <span class="ai-badge">AI</span></h4>
+          <p><strong>Context:</strong> ${scenario.context}</p>
+          <p><strong>Generated:</strong> ${new Date(scenario.generatedAt).toLocaleDateString()}</p>
+          <p><strong>Progress:</strong> ${completionRate}% complete</p>
+          <button class="play-btn" data-id="${key}">${isCompleted ? 'Play Again' : 'Play'}</button>
+        `;
+        
+        elements.generatedScenariosContainer.appendChild(scenarioCard);
+      });
+      
+      // Add event listeners to play buttons
+      document.querySelectorAll('.play-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const scenarioId = e.target.getAttribute('data-id');
+          loadScenario(scenarioId);
+        });
+      });
+    }
+
+    // Calculate completion rate for a scenario
+    function calculateCompletionRate(scenario) {
+      if (!scenario.completionData) return 0;
+      const totalQuestions = scenario.questions.length;
+      const completedQuestions = scenario.completionData.answered || 0;
+      return Math.round((completedQuestions / totalQuestions) * 100);
+    }
+
+    // Scenario Generation
+    async function generateNewScenario() {
+      const scenarioType = document.getElementById("scenario-type").value;
+      const questionCount = parseInt(document.getElementById("question-count").value) || 3;
+      
+      showScreen(screens.loadingScreen);
+      elements.generationStatus.textContent = "Connecting to AI service...";
+      
+      try {
+        // Update status message
+        elements.generationStatus.textContent = "Generating unique scenario content...";
+        
+        // Call the API to generate a new scenario
+        const scenarioData = await generateScenarioViaAPI(scenarioType, questionCount);
+        
+        // Create a unique ID for this scenario
+        const scenarioId = `scenario-${Date.now()}`;
+        
+        // Store the generated scenario
+        generatedScenarios[scenarioId] = {
+          id: scenarioId,
+          title: scenarioData.title,
+          context: scenarioData.context,
+          questions: scenarioData.questions,
+          generatedAt: new Date().toISOString(),
+          completed: false,
+          completionData: {
+            answered: 0,
+            correct: 0
+          }
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('generatedScenarios', JSON.stringify(generatedScenarios));
+        
+        // Load the new scenario
+        loadScenario(scenarioId);
+      } catch (error) {
+        console.error("Error generating scenario:", error);
+        alert("Failed to generate scenario. Please try again.");
+        showScreen(screens.scenarioMenu);
+      }
+    }
+
+    // API call to generate scenario
+    async function generateScenarioViaAPI(type, questionCount) {
+      const response = await fetch(`${API_BASE_URL}/api/subscenarios?majorScenarioId=1&majorScenarioTitle=${type}&n=${questionCount}`);
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform the API response to match our format
+      return {
+        title: data.majorScenarioTitle,
+        context: "Workplace Situation",
+        questions: data.subscenarios.map(sub => ({
+          question: sub.question,
+          options: sub.options
+        }))
+      };
+    }
+
+    // Load a specific scenario
+    function loadScenario(scenarioId) {
+      currentScenario = scenarioId;
+      currentIndex = 0;
+      showScreen(screens.scenarioContainer);
+      renderQuestion();
+    }
+
+    // Render the current question
+    function renderQuestion() {
+      const scenario = generatedScenarios[currentScenario];
+      const question = scenario.questions[currentIndex];
+      
+      elements.scenarioTitle.textContent = `${scenario.title}: ${scenario.context}`;
+      
+      // Update progress bar
+      const progressPercent = (currentIndex / scenario.questions.length) * 100;
+      elements.progressBar.style.width = `${progressPercent}%`;
+      
+      elements.progressText.textContent = `Question ${currentIndex + 1} of ${scenario.questions.length}`;
+      elements.scenarioQuestion.textContent = question.question;
+      elements.optionsDiv.innerHTML = '';
+      elements.feedbackDiv.innerHTML = '';
+      elements.nextBtn.classList.add('hidden');
+      elements.backToMenuBtn.classList.add('hidden');
+      
+      // Shuffle options
+      const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+      
+      shuffledOptions.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'option-btn';
+        button.textContent = option.text;
+        button.addEventListener('click', () => {
+          elements.feedbackDiv.innerHTML = `<p class="${option.type}">${option.feedback}</p>`;
+          elements.nextBtn.classList.remove('hidden');
+          elements.backToMenuBtn.classList.remove('hidden');
+          
+          // Update completion data
+          if (!generatedScenarios[currentScenario].completionData) {
+            generatedScenarios[currentScenario].completionData = {
+              answered: 0,
+              correct: 0
+            };
+          }
+          
+          generatedScenarios[currentScenario].completionData.answered++;
+          if (option.type === 'correct') {
+            generatedScenarios[currentScenario].completionData.correct++;
+          }
+          
+          localStorage.setItem('generatedScenarios', JSON.stringify(generatedScenarios));
+        });
+        elements.optionsDiv.appendChild(button);
+      });
+    }
+
+    // Move to the next question or complete the scenario
+    function nextQuestion() {
+      currentIndex++;
+      const scenario = generatedScenarios[currentScenario];
+      
+      if (currentIndex < scenario.questions.length) {
+        renderQuestion();
+      } else {
+        completeScenario();
+      }
+    }
+
+    // Complete the current scenario
+    function completeScenario() {
+      completedScenarios.add(currentScenario);
+      generatedScenarios[currentScenario].completed = true;
+      localStorage.setItem('generatedScenarios', JSON.stringify(generatedScenarios));
+      
+      showScreen(screens.completionScreen);
+      
+      const correctAnswers = generatedScenarios[currentScenario].completionData.correct;
+      const totalQuestions = generatedScenarios[currentScenario].questions.length;
+      
+      elements.completionMessage.textContent = 
+        `✅ You completed the "${generatedScenarios[currentScenario].title}" scenario! 
+        You got ${correctAnswers} out of ${totalQuestions} questions correct.`;
+    }
+
+    // Restart the current scenario
+    function restartScenario() {
+      currentIndex = 0;
+      showScreen(screens.scenarioContainer);
+      renderQuestion();
+    }
+
+    // Initialize the application
+    function init() {
+      initEventListeners();
+      showScreen(screens.startMenu);
+    }
+
+    // Start the application
+    init();
+  </script>
+</body>
+</html>
